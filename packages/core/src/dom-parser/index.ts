@@ -12,9 +12,11 @@ import type { PageContext, HeadingInfo, ImageInfo, FormInfo, FormInputInfo, Link
 export function parsePageFromHtml(url: string, html: string): PageContext {
   const $ = load(html);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return {
     url,
     html,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dom: $ as any, // Store Cheerio instance for advanced queries
     computedStyles: new Map(), // Will be enhanced in future PRs with jsdom
     headings: extractHeadings($),
@@ -40,6 +42,7 @@ export function extractHeadings($: CheerioAPI): HeadingInfo[] {
       headings.push({
         level,
         text,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         element: element as any,
       });
     }
@@ -62,6 +65,7 @@ export function extractImages($: CheerioAPI): ImageInfo[] {
       images.push({
         src,
         alt,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         element: element as any,
       });
     }
@@ -104,12 +108,14 @@ export function extractForms($: CheerioAPI): FormInfo[] {
         id: inputId,
         hasLabel,
         required,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         element: inputElement as any,
       });
     });
 
     forms.push({
       id,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       element: formElement as any,
       inputs,
     });
@@ -132,6 +138,7 @@ export function extractLinks($: CheerioAPI): LinkInfo[] {
       links.push({
         href,
         text,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         element: element as any,
       });
     }
