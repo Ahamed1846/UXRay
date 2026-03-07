@@ -13,7 +13,7 @@ function validateAndNormalizeUrl(url: string): string {
       throw new Error('Only HTTP and HTTPS protocols are supported');
     }
     return urlObj.toString();
-  } catch (error) {
+  } catch {
     throw new Error(`Invalid URL: ${url}`);
   }
 }
@@ -108,12 +108,13 @@ type AnalyzeRequest = z.infer<typeof AnalyzeRequestSchema>;
 /**
  * Response schema for successful analysis
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const AnalyzeResponseSchema = z.object({
   success: z.boolean(),
   url: z.string(),
   htmlLength: z.number(),
   timestamp: z.string().datetime(),
-  debug: z.record(z.any()).optional(),
+  debug: z.record(z.string(), z.any()).optional(),
 });
 
 type AnalyzeResponse = z.infer<typeof AnalyzeResponseSchema>;
@@ -121,6 +122,7 @@ type AnalyzeResponse = z.infer<typeof AnalyzeResponseSchema>;
 /**
  * Error response schema
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ErrorResponseSchema = z.object({
   success: z.literal(false),
   error: z.string(),

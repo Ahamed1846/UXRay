@@ -346,7 +346,7 @@ Must include:
 
 ---
 
-#### PR #2 (Mar 4): Headless crawler setup + `/analyze` endpoint
+#### PR #2 (Mar 4): Headless crawler setup + `/analyze` endpoint (Completed 👍)
 
 Scope:
 
@@ -367,7 +367,7 @@ Must include:
 
 ---
 
-#### PR #3 (Mar 6): DOM extraction utilities + analyzer framework
+#### PR #3 (Mar 6): DOM extraction utilities + analyzer framework (Completed 👍)
 
 Scope:
 
