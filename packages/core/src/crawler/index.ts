@@ -5,6 +5,7 @@
 
 import { chromium, Browser, Page } from 'playwright';
 import type { PageContext } from '../schema';
+import { parsePageFromHtml } from '../dom-parser';
 
 export interface CrawlerConfig {
   timeout?: number;
@@ -131,7 +132,7 @@ export async function crawlPage(
 
 /**
  * Extract PageContext from HTML and page metadata
- * Full DOM extraction utilities will be implemented in PR #3
+ * Uses DOM parser to extract headings, images, forms, links
  */
 function extractPageContext(
   url: string,
@@ -143,48 +144,17 @@ function extractPageContext(
     console.log(`[UXRay] Extracting page context from ${url}`);
   }
 
-  // For now, return basic context
-  // Full DOM extraction will be implemented in PR #3
-  return {
-    url,
-    html,
-    dom: null as any, // Will be properly parsed in PR #3
-    computedStyles: new Map(),
-    headings: [],
-    images: [],
-    forms: [],
-    links: [],
-    text: extractTextContent(html),
-    viewport,
-  };
-}
+  // Parse HTML and extract all page elements
+  const pageContext = parsePageFromHtml(url, html);
 
-/**
- * Simple text extraction from HTML (basic implementation)
- * Full implementation with proper DOM parsing in PR #3
- */
-function extractTextContent(html: string): string {
-  // Remove script and style tags
-  let text = html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
-    .replace(/<head\b[^<]*(?:(?!<\/head>)<[^<]*)*<\/head>/gi, '');
+  // Add viewport information
+  pageContext.viewport = viewport;
 
-  // Remove HTML tags
-  text = text.replace(/<[^>]+>/g, ' ');
+  if (debug) {
+    console.log(`[UXRay] Extracted: ${pageContext.headings.length} headings, ${pageContext.images.length} images, ${pageContext.forms.length} forms, ${pageContext.links.length} links`);
+  }
 
-  // Decode HTML entities
-  text = text
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-
-  // Clean up whitespace
-  text = text.replace(/\s+/g, ' ').trim();
-
-  return text;
+  return pageContext;
 }
 
 /**

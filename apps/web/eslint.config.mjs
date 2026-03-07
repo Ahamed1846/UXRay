@@ -1,9 +1,11 @@
 import nextPlugin from '@next/eslint-plugin-next';
+import tseslint from 'typescript-eslint';
 
-export default [
+const config = [
   {
     ignores: ['.next', 'out', 'build', 'next-env.d.ts', 'node_modules'],
   },
+  ...tseslint.configs.recommended,
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     plugins: {
@@ -13,13 +15,11 @@ export default [
       ...nextPlugin.configs.recommended.rules,
       ...nextPlugin.configs['core-web-vitals'].rules,
     },
-    languageOptions: {
-      parserOptions: {
-        ecmaVersion: 'latest',
-        sourceType: 'module',
-      },
-    },
   },
 ];
+
+export default config;
+
+
 
 

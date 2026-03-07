@@ -8,3 +8,4 @@ export * from './crawler';
 export * from './analyzers';
 export * from './scoring';
 export * from './utils';
+export * from './dom-parser';
