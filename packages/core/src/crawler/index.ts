@@ -1,8 +1,9 @@
 /**
- * Crawler module - Will be implemented with Playwright
- * Handles page loading, DOM snapshots, and style extraction
+ * Crawler module
+ * Handles page loading, DOM snapshots, and style extraction using Playwright
  */
 
+import { chromium, Browser, Page } from 'playwright';
 import type { PageContext } from '../schema';
 
 export interface CrawlerConfig {
@@ -11,6 +12,8 @@ export interface CrawlerConfig {
     width: number;
     height: number;
   };
+  headless?: boolean;
+  debug?: boolean;
 }
 
 export interface CrawlerResult {
@@ -19,6 +22,11 @@ export interface CrawlerResult {
   title: string;
   error?: string;
 }
+
+// Default configuration
+const DEFAULT_TIMEOUT = 30000; // 30 seconds
+const DEFAULT_VIEWPORT = { width: 1280, height: 720 };
+const DEFAULT_USER_AGENT = 'UXRayBot/0.1 (compatibility test)';
 
 /**
  * Crawls a URL and returns page context for analyzers
@@ -30,8 +38,153 @@ export async function crawlPage(
   url: string,
   config?: CrawlerConfig,
 ): Promise<PageContext | CrawlerResult> {
-  // Implementation will follow in PR #2
-  throw new Error('Not implemented yet');
+  // Validate and normalize URL
+  const normalizedUrl = validateAndNormalizeUrl(url);
+
+  // Check for SSRF
+  const urlObj = new URL(normalizedUrl);
+  if (isPrivateIpRange(urlObj.hostname)) {
+    return {
+      url: normalizedUrl,
+      html: '',
+      title: '',
+      error: 'SSRF protection: Private IP ranges are not allowed',
+    };
+  }
+
+  const timeout = config?.timeout ?? DEFAULT_TIMEOUT;
+  const viewport = config?.viewport ?? DEFAULT_VIEWPORT;
+  const debug = config?.debug ?? false;
+
+  let browser: Browser | null = null;
+  let page: Page | null = null;
+
+  try {
+    if (debug) {
+      console.log(`[UXRay] Starting crawler for: ${normalizedUrl}`);
+    }
+
+    // Launch browser
+    browser = await chromium.launch({
+      headless: config?.headless !== false,
+    });
+
+    // Create page with custom user agent
+    page = await browser.newPage({
+      viewport,
+      userAgent: DEFAULT_USER_AGENT,
+    });
+
+    // Set navigation timeout
+    page.setDefaultTimeout(timeout);
+    page.setDefaultNavigationTimeout(timeout);
+
+    if (debug) {
+      console.log(`[UXRay] Navigating to: ${normalizedUrl}`);
+    }
+
+    // Navigate to URL
+    try {
+      await page.goto(normalizedUrl, { waitUntil: 'networkidle' });
+    } catch (navError) {
+      // Some pages might throw but still load partial content
+      if (debug) {
+        console.warn(`[UXRay] Navigation error (continuing): ${navError}`);
+      }
+    }
+
+    // Get HTML content
+    const html = await page.content();
+    const title = await page.title();
+
+    if (debug) {
+      console.log(`[UXRay] Successfully crawled: ${normalizedUrl} (${html.length} bytes)`);
+    }
+
+    // Extract raw data for PageContext
+    const pageContext = extractPageContext(normalizedUrl, html, viewport, debug);
+
+    return pageContext;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+    if (debug) {
+      console.error(`[UXRay] Crawler error: ${errorMessage}`);
+    }
+
+    return {
+      url: normalizedUrl,
+      html: '',
+      title: '',
+      error: `Failed to crawl URL: ${errorMessage}`,
+    };
+  } finally {
+    // Cleanup
+    if (page) {
+      await page.close().catch(() => {});
+    }
+    if (browser) {
+      await browser.close().catch(() => {});
+    }
+  }
+}
+
+/**
+ * Extract PageContext from HTML and page metadata
+ * Full DOM extraction utilities will be implemented in PR #3
+ */
+function extractPageContext(
+  url: string,
+  html: string,
+  viewport: { width: number; height: number },
+  debug: boolean,
+): PageContext {
+  if (debug) {
+    console.log(`[UXRay] Extracting page context from ${url}`);
+  }
+
+  // For now, return basic context
+  // Full DOM extraction will be implemented in PR #3
+  return {
+    url,
+    html,
+    dom: null as any, // Will be properly parsed in PR #3
+    computedStyles: new Map(),
+    headings: [],
+    images: [],
+    forms: [],
+    links: [],
+    text: extractTextContent(html),
+    viewport,
+  };
+}
+
+/**
+ * Simple text extraction from HTML (basic implementation)
+ * Full implementation with proper DOM parsing in PR #3
+ */
+function extractTextContent(html: string): string {
+  // Remove script and style tags
+  let text = html
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+    .replace(/<head\b[^<]*(?:(?!<\/head>)<[^<]*)*<\/head>/gi, '');
+
+  // Remove HTML tags
+  text = text.replace(/<[^>]+>/g, ' ');
+
+  // Decode HTML entities
+  text = text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+
+  // Clean up whitespace
+  text = text.replace(/\s+/g, ' ').trim();
+
+  return text;
 }
 
 /**
