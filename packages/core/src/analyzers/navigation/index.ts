@@ -12,7 +12,7 @@ import type { Analyzer, Finding, PageContext } from '../../schema';
 export class NavigationAnalyzer implements Analyzer {
   category = 'navigation' as const;
 
-  async analyze(context: PageContext): Promise<Finding[]> {
+  async analyze(_context: PageContext): Promise<Finding[]> {
     // Implementation will follow in PR #8
     return [];
   }

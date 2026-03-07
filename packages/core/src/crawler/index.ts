@@ -96,7 +96,6 @@ export async function crawlPage(
 
     // Get HTML content
     const html = await page.content();
-    const title = await page.title();
 
     if (debug) {
       console.log(`[UXRay] Successfully crawled: ${normalizedUrl} (${html.length} bytes)`);
@@ -170,7 +169,7 @@ export function validateAndNormalizeUrl(url: string): string {
       throw new Error('Only HTTP and HTTPS protocols are supported');
     }
     return urlObj.toString();
-  } catch (error) {
+  } catch {
     throw new Error(`Invalid URL: ${url}`);
   }
 }
