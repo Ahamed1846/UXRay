@@ -11,7 +11,10 @@
   "dependencies": {
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "zod": "^3.22.4",
+    "playwright": "^1.40.0",
+    "@uxray/core": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
