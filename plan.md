@@ -411,7 +411,7 @@ Deliverable at end of Week 1:
 
 ### Week 2 (Mar 10 – Mar 16): Core analyzers
 
-#### PR #5 (Mar 10): Readability engine
+#### PR #5 (Mar 10): Readability engine (Completed 👍)
 
 Scope:
 

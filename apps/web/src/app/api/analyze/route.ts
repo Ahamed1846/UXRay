@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { chromium } from 'playwright';
 import { parsePageFromHtml } from '../../../../../../packages/core/src/dom-parser';
 import { AccessibilityAnalyzer } from '../../../../../../packages/core/src/analyzers/accessibility';
+import { ReadabilityAnalyzer } from '../../../../../../packages/core/src/analyzers/readability';
 
 /**
  * URL validation and normalization
@@ -231,15 +232,23 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Parse and analyze the HTML for accessibility issues
+    // Parse and analyze the HTML for accessibility and readability issues
     let findings = [];
     try {
       const context = parsePageFromHtml(normalizedUrl, crawlResult.html);
-      const analyzer = new AccessibilityAnalyzer();
-      findings = await analyzer.analyze(context);
+      
+      // Run accessibility analyzer
+      const a11yAnalyzer = new AccessibilityAnalyzer();
+      const a11yFindings = await a11yAnalyzer.analyze(context);
+      findings.push(...a11yFindings);
+      
+      // Run readability analyzer
+      const readabilityAnalyzer = new ReadabilityAnalyzer();
+      const readabilityFindings = await readabilityAnalyzer.analyze(context);
+      findings.push(...readabilityFindings);
       
       if (debug) {
-        console.log(`[/api/analyze] Found ${findings.length} accessibility issues`);
+        console.log(`[/api/analyze] Found ${findings.length} total issues (${a11yFindings.length} accessibility + ${readabilityFindings.length} readability)`);
       }
     } catch (analyzerError) {
       if (debug) {
