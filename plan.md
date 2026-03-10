@@ -386,7 +386,7 @@ Must include:
 
 ---
 
-#### PR #4 (Mar 8–9): Accessibility checks MVP
+#### PR #4 (Mar 8–9): Accessibility checks MVP (Completed 👍)
 
 Scope:
 

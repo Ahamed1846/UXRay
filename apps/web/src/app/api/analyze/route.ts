@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { chromium } from 'playwright';
+import { parsePageFromHtml } from '../../../../../../packages/core/src/dom-parser';
+import { AccessibilityAnalyzer } from '../../../../../../packages/core/src/analyzers/accessibility';
 
 /**
  * URL validation and normalization
@@ -229,11 +231,37 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Include raw HTML in response
+    // Parse and analyze the HTML for accessibility issues
+    let findings = [];
+    try {
+      const context = parsePageFromHtml(normalizedUrl, crawlResult.html);
+      const analyzer = new AccessibilityAnalyzer();
+      findings = await analyzer.analyze(context);
+      
+      if (debug) {
+        console.log(`[/api/analyze] Found ${findings.length} accessibility issues`);
+      }
+    } catch (analyzerError) {
+      if (debug) {
+        console.warn(`[/api/analyze] Analyzer error: ${analyzerError}`);
+      }
+      // Continue without findings on analyzer error
+    }
+
+    // Include findings in response
     return NextResponse.json(
       {
         ...response,
-        html: crawlResult.html,
+        findingsCount: findings.length,
+        findings: findings.map((f) => ({
+          id: f.id,
+          category: f.category,
+          severity: f.severity,
+          title: f.title,
+          description: f.description,
+          recommendation: f.recommendation,
+          confidence: f.confidence,
+        })),
       },
       { status: 200 },
     );
