@@ -72,6 +72,7 @@ export type AuditReport = z.infer<typeof AuditReportSchema>;
  */
 export interface PageContext {
   url: string;
+  title?: string;
   html: string;
   dom: Document;
   computedStyles: Map<Element, CSSStyleDeclaration>;
@@ -84,6 +85,12 @@ export interface PageContext {
     width: number;
     height: number;
   };
+  elements?: Array<{
+    tag: string;
+    selector?: string;
+    text?: string;
+    computedStyle?: Record<string, string>;
+  }>;
 }
 
 export interface HeadingInfo {

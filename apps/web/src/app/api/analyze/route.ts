@@ -4,6 +4,7 @@ import { chromium } from 'playwright';
 import { parsePageFromHtml } from '../../../../../../packages/core/src/dom-parser';
 import { AccessibilityAnalyzer } from '../../../../../../packages/core/src/analyzers/accessibility';
 import { ReadabilityAnalyzer } from '../../../../../../packages/core/src/analyzers/readability';
+import { MobileAnalyzer } from '../../../../../../packages/core/src/analyzers/mobile';
 
 /**
  * URL validation and normalization
@@ -232,7 +233,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Parse and analyze the HTML for accessibility and readability issues
+    // Parse and analyze the HTML for accessibility, readability, and mobile usability issues
     let findings = [];
     try {
       const context = parsePageFromHtml(normalizedUrl, crawlResult.html);
@@ -247,8 +248,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const readabilityFindings = await readabilityAnalyzer.analyze(context);
       findings.push(...readabilityFindings);
       
+      // Run mobile usability analyzer
+      const mobileAnalyzer = new MobileAnalyzer();
+      const mobileFindings = await mobileAnalyzer.analyze(context);
+      findings.push(...mobileFindings);
+      
       if (debug) {
-        console.log(`[/api/analyze] Found ${findings.length} total issues (${a11yFindings.length} accessibility + ${readabilityFindings.length} readability)`);
+        console.log(`[/api/analyze] Found ${findings.length} total issues (${a11yFindings.length} accessibility + ${readabilityFindings.length} readability + ${mobileFindings.length} mobile)`);
       }
     } catch (analyzerError) {
       if (debug) {
