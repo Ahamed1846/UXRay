@@ -90,6 +90,9 @@ export interface PageContext {
     selector?: string;
     text?: string;
     computedStyle?: Record<string, string>;
+    attributes?: Record<string, string>;
+    hasLabel?: boolean;
+    label?: string;
   }>;
 }
 

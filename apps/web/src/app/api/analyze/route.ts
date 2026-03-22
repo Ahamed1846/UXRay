@@ -5,6 +5,7 @@ import { parsePageFromHtml } from '../../../../../../packages/core/src/dom-parse
 import { AccessibilityAnalyzer } from '../../../../../../packages/core/src/analyzers/accessibility';
 import { ReadabilityAnalyzer } from '../../../../../../packages/core/src/analyzers/readability';
 import { MobileAnalyzer } from '../../../../../../packages/core/src/analyzers/mobile';
+import { FormAnalyzer } from '../../../../../../packages/core/src/analyzers/forms';
 
 /**
  * URL validation and normalization
@@ -233,7 +234,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Parse and analyze the HTML for accessibility, readability, and mobile usability issues
+    // Parse and analyze the HTML for accessibility, readability, mobile usability, and form experience issues
     let findings = [];
     try {
       const context = parsePageFromHtml(normalizedUrl, crawlResult.html);
@@ -253,8 +254,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const mobileFindings = await mobileAnalyzer.analyze(context);
       findings.push(...mobileFindings);
       
+      // Run form experience analyzer
+      const formAnalyzer = new FormAnalyzer();
+      const formFindings = await formAnalyzer.analyze(context);
+      findings.push(...formFindings);
+      
       if (debug) {
-        console.log(`[/api/analyze] Found ${findings.length} total issues (${a11yFindings.length} accessibility + ${readabilityFindings.length} readability + ${mobileFindings.length} mobile)`);
+        console.log(`[/api/analyze] Found ${findings.length} total issues (${a11yFindings.length} accessibility + ${readabilityFindings.length} readability + ${mobileFindings.length} mobile + ${formFindings.length} forms)`);
       }
     } catch (analyzerError) {
       if (debug) {
