@@ -429,7 +429,7 @@ Must include:
 
 ---
 
-#### PR #6 (Mar 12): Mobile usability analyzer
+#### PR #6 (Mar 12): Mobile usability analyzer (Completed 👍)
 
 Scope:
 
