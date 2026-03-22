@@ -6,6 +6,7 @@ import { AccessibilityAnalyzer } from '../../../../../../packages/core/src/analy
 import { ReadabilityAnalyzer } from '../../../../../../packages/core/src/analyzers/readability';
 import { MobileAnalyzer } from '../../../../../../packages/core/src/analyzers/mobile';
 import { FormAnalyzer } from '../../../../../../packages/core/src/analyzers/forms';
+import { NavigationAnalyzer } from '../../../../../../packages/core/src/analyzers/navigation';
 
 /**
  * URL validation and normalization
@@ -259,8 +260,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const formFindings = await formAnalyzer.analyze(context);
       findings.push(...formFindings);
       
+      // Run navigation clarity analyzer
+      const navigationAnalyzer = new NavigationAnalyzer();
+      const navigationFindings = await navigationAnalyzer.analyze(context);
+      findings.push(...navigationFindings);
+      
       if (debug) {
-        console.log(`[/api/analyze] Found ${findings.length} total issues (${a11yFindings.length} accessibility + ${readabilityFindings.length} readability + ${mobileFindings.length} mobile + ${formFindings.length} forms)`);
+        console.log(`[/api/analyze] Found ${findings.length} total issues (${a11yFindings.length} accessibility + ${readabilityFindings.length} readability + ${mobileFindings.length} mobile + ${formFindings.length} forms + ${navigationFindings.length} navigation)`);
       }
     } catch (analyzerError) {
       if (debug) {
