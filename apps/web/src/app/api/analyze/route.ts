@@ -8,6 +8,7 @@ import { MobileAnalyzer } from '../../../../../../packages/core/src/analyzers/mo
 import { FormAnalyzer } from '../../../../../../packages/core/src/analyzers/forms';
 import { NavigationAnalyzer } from '../../../../../../packages/core/src/analyzers/navigation';
 import { generateReportSummary } from '../../../../../../packages/core/src/scoring';
+import { generateRecommendationsReport } from '../../../../../../packages/core/src/recommendations';
 
 /**
  * URL validation and normalization
@@ -279,7 +280,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Generate scores from findings
     const reportSummary = generateReportSummary(findings);
 
-    // Include findings and scores in response
+    // Generate recommendations from findings
+    const recommendationsReport = generateRecommendationsReport(findings);
+
+    // Include findings, scores, and recommendations in response
     return NextResponse.json(
       {
         ...response,
@@ -294,6 +298,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           recommendation: f.recommendation,
           confidence: f.confidence,
         })),
+        recommendations: {
+          totalFindings: recommendationsReport.totalFindings,
+          immediateCount: recommendationsReport.immediateCount,
+          importantCount: recommendationsReport.importantCount,
+          niceToHaveCount: recommendationsReport.niceToHaveCount,
+          categoryInsights: recommendationsReport.categoryInsights,
+          findings: recommendationsReport.findings.map((f) => ({
+            id: f.id,
+            category: f.category,
+            severity: f.severity,
+            title: f.title,
+            priority: f.priority,
+            suggestedFix: f.suggestedFix,
+            resources: f.resources,
+          })),
+        },
       },
       { status: 200 },
     );
