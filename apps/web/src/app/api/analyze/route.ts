@@ -7,6 +7,7 @@ import { ReadabilityAnalyzer } from '../../../../../../packages/core/src/analyze
 import { MobileAnalyzer } from '../../../../../../packages/core/src/analyzers/mobile';
 import { FormAnalyzer } from '../../../../../../packages/core/src/analyzers/forms';
 import { NavigationAnalyzer } from '../../../../../../packages/core/src/analyzers/navigation';
+import { generateReportSummary } from '../../../../../../packages/core/src/scoring';
 
 /**
  * URL validation and normalization
@@ -275,10 +276,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       // Continue without findings on analyzer error
     }
 
-    // Include findings in response
+    // Generate scores from findings
+    const reportSummary = generateReportSummary(findings);
+
+    // Include findings and scores in response
     return NextResponse.json(
       {
         ...response,
+        summary: reportSummary,
         findingsCount: findings.length,
         findings: findings.map((f) => ({
           id: f.id,
