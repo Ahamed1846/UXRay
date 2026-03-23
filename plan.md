@@ -446,7 +446,7 @@ Must include:
 
 ---
 
-#### PR #7 (Mar 14): Form experience analyzer
+#### PR #7 (Mar 14): Form experience analyzer (Completed 👍)
 
 Scope:
 
@@ -463,7 +463,7 @@ Must include:
 
 ---
 
-#### PR #8 (Mar 16): Navigation clarity analyzer
+#### PR #8 (Mar 16): Navigation clarity analyzer (Completed 👍)
 
 Scope:
 
@@ -486,7 +486,7 @@ Deliverable at end of Week 2:
 
 ### Week 3 (Mar 17 – Mar 23): Scoring + recommendations + storage + CLI
 
-#### PR #9 (Mar 17): Scoring engine + weights
+#### PR #9 (Mar 17): Scoring engine + weights (Completed 👍)
 
 Scope:
 
@@ -505,7 +505,7 @@ Must include:
 
 ---
 
-#### PR #10 (Mar 19): Recommendation engine
+#### PR #10 (Mar 19): Recommendation engine (Completed 👍)
 
 Scope:
 
