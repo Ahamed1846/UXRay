@@ -7,8 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import {
   saveReport,
   type ReportData,
-} from '../../../../../packages/core/src/persistence/db';
-import { AuditReportSchema } from '../../../../../packages/core/src/schema/types';
+} from '../../../../../../packages/core/src/persistence/db';
+import { AuditReportSchema } from '../../../../../../packages/core/src/schema/types';
 
 const EMPTY_RECOMMENDATIONS: ReportData['recommendations'] = {
   totalFindings: 0,

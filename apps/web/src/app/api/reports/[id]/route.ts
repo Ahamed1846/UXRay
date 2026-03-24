@@ -1,19 +1,13 @@
-/**
- * GET /report/[id]
- * Retrieve a stored audit report
- */
-
 import { NextRequest, NextResponse } from 'next/server';
-import { getReportById } from '../../../../../../packages/core/src/persistence/db';
+import { getReportById } from '../../../../../../../packages/core/src/persistence/db';
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } },
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   try {
-    const { id } = params;
+    const { id } = await params;
 
-    // Validate report ID format
     if (!id || typeof id !== 'string' || id.length < 5) {
       return NextResponse.json(
         {
@@ -25,7 +19,6 @@ export async function GET(
       );
     }
 
-    // Retrieve report from database
     const report = await getReportById(id);
 
     if (!report) {
@@ -39,7 +32,6 @@ export async function GET(
       );
     }
 
-    // Return report with success flag
     return NextResponse.json(
       {
         success: true,
@@ -50,7 +42,7 @@ export async function GET(
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown error';
 
-    console.error('[GET /report/[id]] Error:', errorMsg, error);
+    console.error('[GET /api/reports/[id]] Error:', errorMsg, error);
 
     return NextResponse.json(
       {

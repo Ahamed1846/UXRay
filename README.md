@@ -217,3 +217,13 @@ For detailed architecture, scoring model, and analyzer specifications, see [PLAN
 
 For issues, questions, or suggestions, please open a GitHub issue.
 Open-source tool that X-rays websites for real human usability and accessibility.
+
+## Screenshots
+
+### Dashboard overview
+
+![UXRay dashboard overview](docs/screenshots/pr13-dashboard-overview.png)
+
+### Findings expansion and severity colors
+
+![UXRay findings expanded](docs/screenshots/pr13-findings-expanded.png)

@@ -564,7 +564,7 @@ Deliverable at end of Week 3:
 
 ### Week 4 (Mar 24 – Mar 30): UI + export + docs + polish
 
-#### PR #13 (Mar 24): Frontend report dashboard UI
+#### PR #13 (Mar 24): Frontend report dashboard UI (Completed 👍)
 
 Scope:
 

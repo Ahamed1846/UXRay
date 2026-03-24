@@ -29,7 +29,7 @@ export function checkFormLength(context: PageContext): Finding[] {
       }
 
       // Skip submit/reset buttons
-      if (['submit', 'reset', 'button'].includes(el.attributes?.type)) {
+      if (['submit', 'reset', 'button'].includes(el.attributes?.type || '')) {
         return false;
       }
 
@@ -83,7 +83,7 @@ export function checkFormLength(context: PageContext): Finding[] {
         if (el.attributes?.type === 'hidden') {
           return false;
         }
-        if (['submit', 'reset', 'button'].includes(el.attributes?.type)) {
+        if (['submit', 'reset', 'button'].includes(el.attributes?.type || '')) {
           return false;
         }
         if (formId && el.attributes?.form) {

@@ -3,8 +3,10 @@
  * Uses Cheerio to parse HTML and extract page elements
  */
 
-import { load, CheerioAPI } from 'cheerio';
+import { load } from 'cheerio';
 import type { PageContext, HeadingInfo, ImageInfo, FormInfo, FormInputInfo, LinkInfo } from '../schema';
+
+type CheerioAPI = ReturnType<typeof load>;
 
 /**
  * Parse HTML and extract page context
@@ -35,7 +37,8 @@ export function extractHeadings($: CheerioAPI): HeadingInfo[] {
   const headings: HeadingInfo[] = [];
 
   $('h1, h2, h3, h4, h5, h6').each((_, element) => {
-    const level = parseInt(element.name[1], 10);
+    const tagName = $(element).prop('tagName')?.toLowerCase() || 'h1';
+    const level = parseInt(tagName[1], 10);
     const text = $(element).text().trim();
 
     if (text) {
@@ -155,7 +158,7 @@ export function extractTextContent($: CheerioAPI): string {
   $('script, style').remove();
 
   // Get text content and normalize whitespace
-  const text = $.text().replace(/\s+/g, ' ').trim();
+  const text = $('body').text().replace(/\s+/g, ' ').trim();
 
   return text;
 }
@@ -196,7 +199,7 @@ export function getPageStats($: CheerioAPI): {
   formCount: number;
 } {
   return {
-    wordCount: $.text().split(/\s+/).length,
+    wordCount: $('body').text().split(/\s+/).length,
     paragraphCount: $('p').length,
     headingCount: $('h1, h2, h3, h4, h5, h6').length,
     imageCount: $('img').length,
