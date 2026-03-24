@@ -52,6 +52,10 @@ uxray/
 │       │   └── utils/         # Shared utilities
 │       ├── package.json
 │       └── tsconfig.json
+│   └── cli/                    # Command-line UXRay runner
+│       ├── src/
+│       ├── package.json
+│       └── tsconfig.json
 ├── package.json                # Root monorepo configuration
 ├── tsconfig.json               # Base TypeScript configuration
 ├── .prettierrc.json           # Prettier formatting rules
@@ -102,6 +106,52 @@ npm run typecheck
 # Lint
 npm run lint
 ```
+
+### Packages/CLI
+
+```bash
+cd packages/cli
+
+# Show help
+npm run dev -- --help
+
+# Analyze URL and save JSON report
+npm run dev -- https://example.com
+
+# Analyze URL with custom output file
+npm run dev -- https://example.com --out ./report.json
+```
+
+### CLI Usage
+
+You can run the CLI directly from the repository root:
+
+```bash
+# Show help
+npm run cli -- --help
+
+# Analyze a URL
+npm run cli -- https://example.com
+
+# Analyze with options
+npm run cli -- https://example.com --out ./uxray-report.json --timeout 45000 --debug
+```
+
+CLI options:
+
+- `--help`, `-h` show help text
+- `--out`, `-o` output file path for JSON report
+- `--timeout`, `-t` timeout in milliseconds
+- `--debug`, `-d` enable debug logs
+
+Exit codes:
+
+- `0` success
+- `2` usage/argument validation error
+- `3` crawl failure
+- `4` analysis failure
+- `5` output file write failure
+- `1` unknown/internal error
 
 ## Development Setup
 

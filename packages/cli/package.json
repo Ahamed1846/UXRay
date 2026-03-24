@@ -1,0 +1,21 @@
+{
+  "name": "@uxray/cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CLI runner for UXRay audits",
+  "bin": {
+    "uxray": "./bin/uxray.cjs"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "start": "node ./bin/uxray.cjs"
+  },
+  "dependencies": {
+    "@uxray/core": "*",
+    "playwright": "^1.40.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.20.3"
+  }
+}
