@@ -9,6 +9,7 @@ import { FormAnalyzer } from '../../../../../../packages/core/src/analyzers/form
 import { NavigationAnalyzer } from '../../../../../../packages/core/src/analyzers/navigation';
 import { generateReportSummary } from '../../../../../../packages/core/src/scoring';
 import { generateRecommendationsReport } from '../../../../../../packages/core/src/recommendations';
+import { saveReport } from '../../../../../../packages/core/src/persistence/db';
 
 /**
  * URL validation and normalization
@@ -109,6 +110,7 @@ const AnalyzeRequestSchema = z.object({
   url: z.string().url('Invalid URL format'),
   timeout: z.number().int().positive().optional().default(30000),
   debug: z.boolean().optional().default(false),
+  persist: z.boolean().optional().default(false),
 });
 
 type AnalyzeRequest = z.infer<typeof AnalyzeRequestSchema>;
@@ -160,7 +162,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    const { url, timeout, debug }: AnalyzeRequest = validation.data;
+    const { url, timeout, debug, persist }: AnalyzeRequest = validation.data;
 
     // Log request if debug enabled
     if (debug) {
@@ -238,7 +240,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     // Parse and analyze the HTML for accessibility, readability, mobile usability, and form experience issues
-    let findings = [];
+    const findings = [];
     try {
       const context = parsePageFromHtml(normalizedUrl, crawlResult.html);
       
@@ -283,40 +285,93 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Generate recommendations from findings
     const recommendationsReport = generateRecommendationsReport(findings);
 
-    // Include findings, scores, and recommendations in response
-    return NextResponse.json(
-      {
-        ...response,
-        summary: reportSummary,
-        findingsCount: findings.length,
-        findings: findings.map((f) => ({
+    // Prepare response
+    const analysisResponse = {
+      ...response,
+      summary: reportSummary,
+      findingsCount: findings.length,
+      findings: findings.map((f) => ({
+        id: f.id,
+        category: f.category,
+        severity: f.severity,
+        title: f.title,
+        description: f.description,
+        recommendation: f.recommendation,
+        confidence: f.confidence,
+      })),
+      recommendations: {
+        totalFindings: recommendationsReport.totalFindings,
+        immediateCount: recommendationsReport.immediateCount,
+        importantCount: recommendationsReport.importantCount,
+        niceToHaveCount: recommendationsReport.niceToHaveCount,
+        categoryInsights: recommendationsReport.categoryInsights,
+        findings: recommendationsReport.findings.map((f) => ({
           id: f.id,
           category: f.category,
           severity: f.severity,
           title: f.title,
-          description: f.description,
-          recommendation: f.recommendation,
-          confidence: f.confidence,
+          priority: f.priority,
+          suggestedFix: f.suggestedFix,
+          resources: f.resources,
         })),
-        recommendations: {
-          totalFindings: recommendationsReport.totalFindings,
-          immediateCount: recommendationsReport.immediateCount,
-          importantCount: recommendationsReport.importantCount,
-          niceToHaveCount: recommendationsReport.niceToHaveCount,
-          categoryInsights: recommendationsReport.categoryInsights,
-          findings: recommendationsReport.findings.map((f) => ({
+      },
+    };
+
+    // Optionally save report for shareable link
+    if (persist) {
+      try {
+        const { id: reportId } = await saveReport({
+          url: normalizedUrl,
+          timestamp: response.timestamp,
+          summary: reportSummary,
+          findingsCount: findings.length,
+          findings: findings.map((f) => ({
             id: f.id,
             category: f.category,
             severity: f.severity,
             title: f.title,
-            priority: f.priority,
-            suggestedFix: f.suggestedFix,
-            resources: f.resources,
+            priority:
+              'priority' in f && typeof f.priority === 'string'
+                ? f.priority
+                : 'important',
+            suggestedFix:
+              'suggestedFix' in f && typeof f.suggestedFix === 'string'
+                ? f.suggestedFix
+                : f.recommendation,
+            confidence: f.confidence,
           })),
-        },
-      },
-      { status: 200 },
-    );
+          recommendations: {
+            totalFindings: recommendationsReport.totalFindings,
+            immediateCount: recommendationsReport.immediateCount,
+            importantCount: recommendationsReport.importantCount,
+            niceToHaveCount: recommendationsReport.niceToHaveCount,
+            categoryInsights: recommendationsReport.categoryInsights,
+          },
+        });
+
+        if (debug) {
+          console.log(`[/api/analyze] Report saved with ID: ${reportId}`);
+        }
+
+        return NextResponse.json(
+          {
+            ...analysisResponse,
+            reportId,
+            reportUrl: `/report/${reportId}`,
+            shareUrl: `${process.env.VERCEL_URL || 'http://localhost:3000'}/report/${reportId}`,
+          },
+          { status: 200 },
+        );
+      } catch (saveError) {
+        if (debug) {
+          console.warn(`[/api/analyze] Failed to save report: ${saveError}`);
+        }
+        // Continue returning analysis even if persistence fails
+      }
+    }
+
+    // Include findings, scores, and recommendations in response
+    return NextResponse.json(analysisResponse, { status: 200 });
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown error';
 
