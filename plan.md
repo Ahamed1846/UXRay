@@ -540,7 +540,7 @@ Must include:
 
 ---
 
-#### PR #12 (Mar 23): CLI mode
+#### PR #12 (Mar 23): CLI mode (Completed 👍)
 
 Scope:
 
