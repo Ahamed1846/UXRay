@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { parsePageFromHtml } from '../../../../../../packages/core/src/dom-parser';
 import { AccessibilityAnalyzer } from '../../../../../../packages/core/src/analyzers/accessibility';
 
@@ -6,7 +6,7 @@ import { AccessibilityAnalyzer } from '../../../../../../packages/core/src/analy
  * Demo API endpoint for testing
  * Returns accessibility findings for a mock HTML page
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const mockHtml = `
       <!DOCTYPE html>

@@ -14,6 +14,8 @@ node_modules/
 .DS_Store
 *.pem
 *.log
+*.db
+*.db-*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
